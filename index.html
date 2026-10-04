@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UE5 // Dev Log</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#09090b;--p:#18181b;--b:#27272a;--t:#e4e4e7;--m:#71717a;--a:#22d3ee;--ok:#34d399}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.w{max-width:960px;margin:0 auto;padding:20px 14px 60px}
+h1{font-size:18px;margin:0;letter-spacing:.05em}h1 span{color:var(--a)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+button,input,select{font:inherit;color:inherit}
+.btn{background:var(--p);border:1px solid var(--b);border-radius:6px;padding:6px 10px;cursor:pointer}
+.btn:hover{border-color:var(--a)}
+.bar{height:6px;background:var(--b);border-radius:9px;overflow:hidden;flex:1;min-width:60px}
+.bar i{display:block;height:100%;background:var(--a);transition:width .25s}
+.bar i.d{background:var(--ok)}
+.tools{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.tools input[type=search]{flex:1;min-width:180px;background:var(--p);border:1px solid var(--b);border-radius:6px;padding:7px 10px;outline:0}
+.tools input:focus{border-color:var(--a)}
+.seg{display:flex;border:1px solid var(--b);border-radius:6px;overflow:hidden}
+.seg button{background:var(--p);border:0;padding:7px 12px;cursor:pointer;color:var(--m)}
+.seg button.on{background:var(--a);color:#001014;font-weight:700}
+.g{border:1px solid var(--b);border-radius:8px;margin:8px 0;background:var(--p)}
+.g .g{background:#111114}
+.gh{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}
+.gh .c{color:var(--m);transition:transform .15s;width:12px}
+.g.open>.gh .c{transform:rotate(90deg);color:var(--a)}
+.gh .n{flex:0 1 auto;font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.06em}
+.gh .s{color:var(--m);font-size:12px;white-space:nowrap}
+.gh .bar{max-width:200px}
+.gb{display:none;padding:0 10px 10px 18px}
+.g.open>.gb{display:block}
+.r{display:flex;align-items:center;gap:10px;padding:7px 8px;border-top:1px solid var(--b);flex-wrap:wrap}
+.r:first-child{border-top:0}
+.r label{display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:120px;text-transform:capitalize}
+.r.done label span{color:var(--m);text-decoration:line-through}
+input[type=checkbox]{appearance:none;width:16px;height:16px;border:1px solid var(--m);border-radius:4px;cursor:pointer;display:grid;place-items:center;margin:0}
+input[type=checkbox]:checked{background:var(--ok);border-color:var(--ok)}
+input[type=checkbox]:checked::after{content:"";width:8px;height:4px;border:solid #022;border-width:0 0 2px 2px;transform:rotate(-45deg) translate(1px,-1px)}
+.up{font-size:12px;color:var(--m);border:1px dashed var(--b);border-radius:6px;padding:4px 8px;cursor:pointer}
+.up:hover{color:var(--a);border-color:var(--a)}
+.up input{display:none}
+.v{display:flex;gap:6px;align-items:center}
+.v video{width:96px;height:54px;object-fit:cover;border-radius:4px;border:1px solid var(--b);cursor:pointer;background:#000}
+.tag{font-size:11px;color:var(--m)}.tag.ok{color:var(--ok)}.tag.er{color:#f87171}
+.x{background:none;border:0;color:var(--m);cursor:pointer;font-size:16px}.x:hover{color:#f87171}
+.md{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:9;padding:16px}
+.md.on{display:grid}
+.md video{max-width:100%;max-height:80vh;border:1px solid var(--b);border-radius:8px}
+.box{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:16px;width:min(440px,100%);display:grid;gap:8px}
+.box input{background:var(--bg);border:1px solid var(--b);border-radius:6px;padding:7px;width:100%}
+.empty{color:var(--m);text-align:center;padding:30px}
+</style></head><body><div class="w">
+<div class="top"><h1><span>&gt;_</span> UE5 // DEV LOG</h1><div style="display:flex;gap:6px"><button class="btn" id="gh">GitHub sync</button><button class="btn" id="exp">Expand all</button><button class="btn" id="col">Collapse</button></div></div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:14px"><div class="bar"><i id="tb"></i></div><span id="tt" class="tag"></span></div>
+<div class="tools"><input type="search" id="q" placeholder="Search items…"><div class="seg" id="seg"><button data-f="all" class="on">All</button><button data-f="done">Completed</button><button data-f="pending">Pending</button></div></div>
+<div id="tree"></div></div>
+<div class="md" id="md"><video controls id="mv"></video></div>
+<div class="md" id="gm"><div class="box"><b>GitHub sync (optional)</b>
+<span class="tag">Uploads commit videos to your repo via the GitHub API. Needs a token with contents write access, stored only in this browser. Works when this file is run locally or self-hosted; hosted sandboxes may block api.github.com.</span>
+<input id="g1" placeholder="owner/repo"><input id="g2" placeholder="branch (main)"><input id="g3" placeholder="folder (devlog-videos)"><input id="g4" type="password" placeholder="personal access token">
+<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="gc">Cancel</button><button class="btn" id="gs">Save</button></div></div></div>
+<script>
+const V=["model","animation","logic","audio","VFX"],A=["model","animation","logic","audio"];
+const D={"Planets / Levels":["desert","forest","snow","lava","space station"],
+"Core Mechanics":["camera & movement systems","combat & hit registration","inventory & menus / HUD","save & checkpoint system","game loop & state management"],
+"Main Character":V,
+"NPC":{"Enemies":{"Bosses":{"Rakhemien Guard":V,"Rakhemien Master":{"Phase 1":V,"Phase 2":V,"Phase 3":V},"Rakhemien General":V},
+"Normal Enemies":{"Rakhemien Federation Soldiers":{"Foot Soldiers":V,"Jet Soldiers":V,"Shooters":V}}},"Friendlies":A,"Civilians":A},
+"Assets":{"Weapons":{"Knife":V,"Staff":V,"Sword":V},"Spaceships":{"Main Character Team Spaceship":V,"Rakhemien Spaceship":V,"Public Transport Spaceship":V,"Space Station":V}}};
+const $=s=>document.querySelector(s),LS=localStorage;
+const J=(k,d)=>{try{return JSON.parse(LS.getItem(k))||d}catch{return d}};
+const sv=(k,v)=>{try{LS.setItem(k,JSON.stringify(v))}catch{}};
+let done=J("ue5.done",{}),open=J("ue5.open",{}),vids={},status={},filt="all",qs="",urls={};
+// IndexedDB for video blobs
+let db;const dbp=new Promise(r=>{try{const q=indexedDB.open("ue5log",1);q.onupgradeneeded=()=>q.result.createObjectStore("v");q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch{r()}});
+const dbo=(m,f)=>new Promise(r=>{if(!db)return r();const s=db.transaction("v",m).objectStore("v"),q=f(s);q.onsuccess=()=>r(q.result);q.onerror=()=>r()});
+function count(n,p){if(Array.isArray(n)){let d=0;n.forEach(x=>{if(done[p+"/"+x])d++});return[d,n.length]}
+let d=0,t=0;for(const k in n){const[a,b]=count(n[k],p+"/"+k);d+=a;t+=b}return[d,t]}
+const match=id=>{const nm=id.split("/").pop().toLowerCase(),isd=!!done[id];
+if(filt==="done"&&!isd)return 0;if(filt==="pending"&&isd)return 0;
+if(qs&&!id.toLowerCase().includes(qs))return 0;return 1};
+function prog(d,t){const pc=t?Math.round(d/t*100):0;return`<div class="bar"><i class="${pc==100?"d":""}" style="width:${pc}%"></i></div><span class="s">${d}/${t} Done (${pc}%)</span>`}
+function node(n,p,name){
+ const filtering=filt!=="all"||qs;
+ if(Array.isArray(n)){const rows=n.filter(x=>match(p+"/"+x));if(!rows.length)return"";
+  return grp(name,p,rows.map(x=>row(p+"/"+x,x)).join(""),count(n,p),filtering)}
+ let h="";for(const k in n)h+=node(n[k],p+"/"+k,k);if(!h)return"";
+ return grp(name,p,h,count(n,p),filtering)}
+function grp(name,p,body,c,f){return`<div class="g ${open[p]||f?"open":""}" data-p="${p}"><div class="gh"><span class="c">▶</span><span class="n">${name}</span>${prog(c[0],c[1])}</div><div class="gb">${body}</div></div>`}
+function row(id,name){const has=vids[id];
+ return`<div class="r ${done[id]?"done":""}" data-id="${id}"><label><input type="checkbox" ${done[id]?"checked":""}><span>${name}</span></label>
+ ${status[id]?`<span class="tag ${status[id][1]}">${status[id][0]}</span>`:""}
+ ${has?`<div class="v"><video muted preload="metadata" src="${urls[id]}#t=0.5" class="pv"></video><button class="x" title="Remove video">×</button></div>`:""}
+ <label class="up">${has?"Replace":"+ Video"}<input type="file" accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"></label></div>`}
+function render(){
+ const t=$("#tree");let h="";for(const k in D)h+=node(D[k],k,k);
+ t.innerHTML=h||'<div class="empty">No items match.</div>';
+ const[d,n]=count(D,"");$("#tb").style.width=(n?d/n*100:0)+"%";$("#tt").textContent=`${d}/${n} Done (${Math.round(d/n*100)}%)`}
+// fix: count with top-level paths
+const _c=count;count=function(n,p){if(p===""){let d=0,t=0;for(const k in n){const[a,b]=_c(n[k],k);d+=a;t+=b}return[d,t]}return _c(n,p)};
+$("#tree").addEventListener("click",e=>{
+ const gh=e.target.closest(".gh");if(gh){const g=gh.parentElement,p=g.dataset.p;if(!(filt!=="all"||qs)){open[p]=!open[p];sv("ue5.open",open)}g.classList.toggle("open");return}
+ const r=e.target.closest(".r");if(!r)return;const id=r.dataset.id;
+ if(e.target.classList.contains("pv")){const v=$("#mv");v.src=urls[id];$("#md").classList.add("on");v.play().catch(()=>{})}
+ if(e.target.classList.contains("x")){delGone(id)}});
+$("#tree").addEventListener("change",async e=>{
+ const r=e.target.closest(".r");if(!r)return;const id=r.dataset.id;
+ if(e.target.type==="checkbox"){done[id]=e.target.checked;if(!done[id])delete done[id];sv("ue5.done",done);render()}
+ if(e.target.type==="file"&&e.target.files[0])upload(id,e.target.files[0])});
+async function delGone(id){await dbo("readwrite",s=>s.delete(id));delete vids[id];delete status[id];if(urls[id])URL.revokeObjectURL(urls[id]);delete urls[id];render()}
+async function upload(id,f){
+ if(!/\.(mp4|webm|mov)$/i.test(f.name)){status[id]=["Unsupported type","er"];return render()}
+ await dbp;await dbo("readwrite",s=>s.put(f,id));vids[id]=1;if(urls[id])URL.revokeObjectURL(urls[id]);urls[id]=URL.createObjectURL(f);
+ status[id]=["Saved locally","ok"];render();
+ const g=J("ue5.gh",null);if(g&&g.repo&&g.token)push(id,f,g)}
+async function push(id,f,g){
+ status[id]=["Pushing to GitHub…",""];render();
+ try{const ext=f.name.split(".").pop().toLowerCase(),path=`${g.folder||"devlog-videos"}/${id.replace(/[^a-z0-9]+/gi,"-").toLowerCase()}.${ext}`,
+ url=`https://api.github.com/repos/${g.repo}/contents/${path}`,H={Authorization:"Bearer "+g.token,Accept:"application/vnd.github+json"};
+ const b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(",")[1]);r.onerror=no;r.readAsDataURL(f)});
+ let sha;const ex=await fetch(url+"?ref="+(g.branch||"main"),{headers:H});if(ex.ok)sha=(await ex.json()).sha;
+ const res=await fetch(url,{method:"PUT",headers:H,body:JSON.stringify({message:"devlog: add video for "+id,content:b64,branch:g.branch||"main",sha})});
+ if(!res.ok)throw new Error(res.status);status[id]=["On GitHub ✓","ok"]}
+ catch(err){status[id]=["GitHub failed (kept locally)","er"]}
+ render()}
+// controls
+$("#q").oninput=e=>{qs=e.target.value.trim().toLowerCase();render()};
+$("#seg").onclick=e=>{const b=e.target.closest("button");if(!b)return;filt=b.dataset.f;[...$("#seg").children].forEach(x=>x.classList.toggle("on",x===b));render()};
+const setAll=v=>{const all=(n,p)=>{if(Array.isArray(n)){open[p]=v;return}open[p]=v;for(const k in n)all(n[k],p+"/"+k)};for(const k in D)all(D[k],k);sv("ue5.open",open);render()};
+$("#exp").onclick=()=>setAll(true);$("#col").onclick=()=>setAll(false);
+$("#md").onclick=e=>{if(e.target.id==="md"||e.target.id!=="mv"){$("#mv").pause();$("#md").classList.remove("on")}};
+addEventListener("keydown",e=>{if(e.key==="Escape"){$("#mv").pause();$("#md").classList.remove("on");$("#gm").classList.remove("on")}});
+$("#gh").onclick=()=>{const g=J("ue5.gh",{});$("#g1").value=g.repo||"";$("#g2").value=g.branch||"";$("#g3").value=g.folder||"";$("#g4").value=g.token||"";$("#gm").classList.add("on")};
+$("#gc").onclick=()=>$("#gm").classList.remove("on");
+$("#gm").onclick=e=>{if(e.target.id==="gm")$("#gm").classList.remove("on")};
+$("#gs").onclick=()=>{sv("ue5.gh",{repo:$("#g1").value.trim(),branch:$("#g2").value.trim(),folder:$("#g3").value.trim(),token:$("#g4").value.trim()});$("#gm").classList.remove("on")};
+(async()=>{await dbp;const keys=await dbo("readonly",s=>s.getAllKeys());for(const k of keys||[]){const f=await dbo("readonly",s=>s.get(k));if(f){vids[k]=1;urls[k]=URL.createObjectURL(f)}}render()})();
+</script></body></html>
