@@ -53,11 +53,15 @@ input[type=checkbox]:checked::after{content:"";width:8px;height:4px;border:solid
 .box input{background:var(--bg);border:1px solid var(--b);border-radius:6px;padding:7px;width:100%}
 .empty{color:var(--m);text-align:center;padding:30px}
 </style></head><body><div class="w">
-<div class="top"><h1><span>&gt;_</span> UE5 // DEV LOG</h1><div style="display:flex;gap:6px"><span id="sy" class="tag"></span><button class="btn" id="exp">Expand all</button><button class="btn" id="col">Collapse</button></div></div>
+<div class="top"><h1><span>&gt;_</span> UE5 // DEV LOG</h1><div style="display:flex;gap:6px"><span id="sy" class="tag"></span><button class="btn" id="gh">⚙ Settings</button><button class="btn" id="exp">Expand all</button><button class="btn" id="col">Collapse</button></div></div>
 <div style="display:flex;align-items:center;gap:10px;margin-top:14px"><div class="bar"><i id="tb"></i></div><span id="tt" class="tag"></span></div>
 <div class="tools"><input type="search" id="q" placeholder="Search items…"><div class="seg" id="seg"><button data-f="all" class="on">All</button><button data-f="done">Completed</button><button data-f="pending">Pending</button></div></div>
 <div id="tree"></div></div>
 <div class="md" id="md"><video controls id="mv"></video></div>
+<div class="md" id="gm"><div class="box"><b>GitHub storage</b>
+<span class="tag">Progress and videos are committed to your repo, so every device sees the same data. Create a fine-grained token limited to this one repo with Contents: read &amp; write. It is kept only in this browser, never in the repo, so enter it once per device.</span>
+<input id="g1" placeholder="owner/repo"><input id="g2" placeholder="branch (blank = default)"><input id="g3" placeholder="data folder (devlog-data)"><input id="g4" type="password" placeholder="personal access token">
+<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="gc">Cancel</button><button class="btn" id="gs">Save</button></div></div></div>
 <script>
 const V=["model","animation","logic","audio","VFX"],A=["model","animation","logic","audio"];
 const D={"Planets / Levels":["desert","forest","snow","lava","space station"],
@@ -70,9 +74,6 @@ const $=s=>document.querySelector(s),LS=localStorage;
 const J=(k,d)=>{try{return JSON.parse(LS.getItem(k))||d}catch{return d}};
 const sv=(k,v)=>{try{LS.setItem(k,JSON.stringify(v))}catch{}};
 let done=J("ue5.done",{}),open=J("ue5.open",{}),vids={},status={},filt="all",qs="",urls={};
-// IndexedDB for video blobs
-let db;const dbp=new Promise(r=>{try{const q=indexedDB.open("ue5log",1);q.onupgradeneeded=()=>q.result.createObjectStore("v");q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch{r()}});
-const dbo=(m,f)=>new Promise(r=>{if(!db)return r();const s=db.transaction("v",m).objectStore("v"),q=f(s);q.onsuccess=()=>r(q.result);q.onerror=()=>r()});
 function count(n,p){if(Array.isArray(n)){let d=0;n.forEach(x=>{if(done[p+"/"+x])d++});return[d,n.length]}
 let d=0,t=0;for(const k in n){const[a,b]=count(n[k],p+"/"+k);d+=a;t+=b}return[d,t]}
 const match=id=>{const nm=id.split("/").pop().toLowerCase(),isd=!!done[id];
@@ -102,42 +103,77 @@ $("#tree").addEventListener("click",e=>{
  const r=e.target.closest(".r");if(!r)return;const id=r.dataset.id;
  if(e.target.classList.contains("pv")){const v=$("#mv");v.src=urls[id];$("#md").classList.add("on");v.play().catch(()=>{})}
  if(e.target.classList.contains("x")){delGone(id)}});
-$("#tree").addEventListener("change",async e=>{
- const r=e.target.closest(".r");if(!r)return;const id=r.dataset.id;
- if(e.target.type==="checkbox"){done[id]=e.target.checked;if(!done[id])delete done[id];sv("ue5.done",done);cset(id,{done:!!done[id]});render()}
- if(e.target.type==="file"&&e.target.files[0])upload(id,e.target.files[0])});
-async function delGone(id){if(CL.db){const o=CD[id]&&CD[id].vid;await cset(id,{vid:null,vurl:null,vname:null});if(o&&CL.assets)CL.assets.delete(o).catch(()=>{});delete vids[id];delete urls[id];return render()}
- await dbo("readwrite",s=>s.delete(id));delete vids[id];delete status[id];if(urls[id])URL.revokeObjectURL(urls[id]);delete urls[id];render()}
-async function upload(id,f){
- if(!/\.(mp4|webm|mov)$/i.test(f.name)){status[id]=["Unsupported type","er"];return render()}
- if(CL.assets){if(f.size>20*1048576){status[id]=["Over 20 MB limit","er"];return render()}
-  status[id]=["Uploading…",""];render();
-  try{const old=CD[id]&&CD[id].vid,r=await CL.assets.upload(f);await cset(id,{vid:r.id,vurl:r.url,vname:f.name});if(old)CL.assets.delete(old).catch(()=>{});vids[id]=1;urls[id]=r.url;status[id]=["Synced ✓","ok"]}
-  catch(e){status[id]=["Upload failed","er"]}
-  return render()}
- await dbp;await dbo("readwrite",s=>s.put(f,id));vids[id]=1;if(urls[id])URL.revokeObjectURL(urls[id]);urls[id]=URL.createObjectURL(f);
- status[id]=["Saved locally","ok"];render();
- }
 // controls
 $("#q").oninput=e=>{qs=e.target.value.trim().toLowerCase();render()};
 $("#seg").onclick=e=>{const b=e.target.closest("button");if(!b)return;filt=b.dataset.f;[...$("#seg").children].forEach(x=>x.classList.toggle("on",x===b));render()};
 const setAll=v=>{const all=(n,p)=>{if(Array.isArray(n)){open[p]=v;return}open[p]=v;for(const k in n)all(n[k],p+"/"+k)};for(const k in D)all(D[k],k);sv("ue5.open",open);render()};
 $("#exp").onclick=()=>setAll(true);$("#col").onclick=()=>setAll(false);
 $("#md").onclick=e=>{if(e.target.id==="md"||e.target.id!=="mv"){$("#mv").pause();$("#md").classList.remove("on")}};
-addEventListener("keydown",e=>{if(e.key==="Escape"){$("#mv").pause();$("#md").classList.remove("on")}});
-const CL={db:null,assets:null},CD={};let cbusy=Promise.resolve();
-function cset(id,patch){CD[id]={...CD[id],...patch};if(!CL.db)return Promise.resolve();const k=id.replace(/[^a-z0-9]+/gi,"_").toLowerCase();
- cbusy=cbusy.then(()=>CL.db.doc("items/"+k).set({k:id,...CD[id]})).catch(()=>{$("#sy").textContent="⚠ sync error";$("#sy").className="tag er"});return cbusy}
-async function initCloud(){
- const c=window.claude;if(!c||!c.use){$("#sy").textContent="local only";return}
- try{CL.db=await c.use("db");CL.assets=await c.use("assets")}catch{}
- if(!CL.db){$("#sy").textContent="local only (sign in to sync)";return}
- let first=true;
- CL.db.collection("items").onSnapshot(sn=>{
-  const nd={},nv={};
-  sn.docs.forEach(x=>{const d=x.data();if(!d||!d.k)return;CD[d.k]=d;if(d.done)nd[d.k]=true;if(d.vid){nv[d.k]=1;urls[d.k]=d.vurl||"/_blob/"+d.vid}});
-  if(first&&sn.empty){Object.keys(done).forEach(k=>cset(k,{done:true}))}else{done=nd;vids=nv;sv("ue5.done",done)}
-  first=false;$("#sy").textContent="☁ synced";$("#sy").className="tag ok";render()},
-  ()=>{$("#sy").textContent="⚠ sync error";$("#sy").className="tag er"})}
-(async()=>{await dbp;const keys=await dbo("readonly",s=>s.getAllKeys());for(const k of keys||[]){const f=await dbo("readonly",s=>s.get(k));if(f){vids[k]=1;urls[k]=URL.createObjectURL(f)}}render();initCloud()})();
+addEventListener("keydown",e=>{if(e.key==="Escape"){$("#mv").pause();$("#md").classList.remove("on");$("#gm").classList.remove("on")}});
+
+const CF=J("ue5.cfg",{}),tried={},VM={};let sha=null,dirty={},vdirty={},saving=false,timer;
+const guess=(()=>{const h=location.hostname;if(!h.endsWith(".github.io"))return"";const o=h.split(".")[0],p=location.pathname.split("/")[1];return o+"/"+(p&&!/\./.test(p)?p:h)})();
+const cfg=()=>({repo:CF.repo||guess,branch:CF.branch||"",dir:(CF.dir||"devlog-data").replace(/^\/|\/$/g,""),token:CF.token||""});
+const qb=c=>c.branch?"?ref="+encodeURIComponent(c.branch):"";
+const api=(p,o={})=>{const c=cfg();return fetch(`https://api.github.com/repos/${c.repo}/contents/${p}${o.q||""}`,{method:o.m||"GET",headers:{Accept:o.raw?"application/vnd.github.raw+json":"application/vnd.github+json",...(c.token?{Authorization:"Bearer "+c.token}:{})},body:o.b?JSON.stringify(o.b):undefined})};
+const b64=t=>btoa(unescape(encodeURIComponent(t))),unb64=t=>decodeURIComponent(escape(atob(t.replace(/\n/g,""))));
+const setSy=(t,c)=>{$("#sy").textContent=t;$("#sy").className="tag "+(c||"")};
+function remote(d){
+ const nd={...(d.done||{})};for(const k in dirty){if(dirty[k])nd[k]=true;else delete nd[k]}
+ for(const k in vdirty){if(vdirty[k])d.videos[k]=vdirty[k];else delete d.videos[k]}
+ done=nd;sv("ue5.done",done);Object.keys(VM).forEach(k=>delete VM[k]);Object.assign(VM,d.videos||{});
+ vids={};for(const k in VM){vids[k]=1;if(!urls[k])urls[k]=VM[k].path}
+ for(const k in urls)if(!VM[k])delete urls[k];render()}
+async function pull(){
+ const c=cfg();if(!c.repo){setSy("set up GitHub →","er");return}
+ const r=await api(c.dir+"/progress.json",{q:qb(c)});
+ if(r.status===404){sha=null;return remote({done:{...done},videos:{}})}
+ if(!r.ok)throw r.status;
+ const j=await r.json();sha=j.sha;remote(JSON.parse(unb64(j.content)))}
+function queue(){clearTimeout(timer);setSy("saving…","");timer=setTimeout(flush,1200)}
+async function flush(){
+ if(saving)return queue();
+ const c=cfg();if(!c.token){setSy("read-only: add token in Settings","er");return}
+ saving=true;const d0={...dirty},v0={...vdirty};
+ try{for(let i=0;i<4;i++){
+  const r=await api(c.dir+"/progress.json",{m:"PUT",b:{message:"devlog: update progress",content:b64(JSON.stringify({done,videos:VM,updated:new Date().toISOString()},null,1)),sha:sha||undefined,branch:c.branch||undefined}});
+  if(r.ok){sha=(await r.json()).content.sha;for(const k in d0)if(dirty[k]===d0[k])delete dirty[k];for(const k in v0)if(vdirty[k]===v0[k])delete vdirty[k];setSy("☁ saved","ok");break}
+  if(r.status===409||r.status===422)await pull();else throw r.status;
+  if(i==3)throw "conflict"}}
+ catch(e){setSy("⚠ save failed ("+e+")","er")}
+ saving=false;render()}
+$("#tree").addEventListener("change",e=>{
+ const r=e.target.closest(".r");if(!r)return;const id=r.dataset.id;
+ if(e.target.type==="checkbox"){const v=e.target.checked;if(v)done[id]=true;else delete done[id];dirty[id]=v;sv("ue5.done",done);queue();render()}
+ if(e.target.type==="file"&&e.target.files[0])upload(id,e.target.files[0])});
+$("#tree").addEventListener("error",async e=>{
+ if(e.target.tagName!=="VIDEO")return;const r=e.target.closest(".r");if(!r)return;const id=r.dataset.id;
+ if(tried[id]||!VM[id])return;tried[id]=1;
+ try{const x=await api(VM[id].path,{q:qb(cfg()),raw:1});if(!x.ok)throw 0;urls[id]=URL.createObjectURL(await x.blob());render()}catch{}},true);
+const readB64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(",")[1]);r.onerror=no;r.readAsDataURL(f)});
+async function delGH(path){try{const c=cfg(),g=await api(path,{q:qb(c)});if(!g.ok)return;await api(path,{m:"DELETE",b:{message:"devlog: remove video",sha:(await g.json()).sha,branch:c.branch||undefined}})}catch{}}
+function delGone(id){const m=VM[id];if(!m)return;delete VM[id];vdirty[id]=null;delete vids[id];delete urls[id];queue();render();delGH(m.path)}
+async function upload(id,f){
+ const c=cfg();
+ if(!/\.(mp4|webm|mov)$/i.test(f.name)){status[id]=["Unsupported type","er"];return render()}
+ if(!c.token){status[id]=["Add token in Settings","er"];return render()}
+ if(f.size>95*1048576){status[id]=["Over 95 MB GitHub limit","er"];return render()}
+ status[id]=["Uploading…",""];render();
+ try{const path=`${c.dir}/videos/${id.replace(/[^a-z0-9]+/gi,"-").toLowerCase()}.${f.name.split(".").pop().toLowerCase()}`;
+  const content=await readB64(f),ex=await api(path,{q:qb(c)});
+  const r=await api(path,{m:"PUT",b:{message:"devlog: video for "+id,content,sha:ex.ok?(await ex.json()).sha:undefined,branch:c.branch||undefined}});
+  if(!r.ok)throw r.status;
+  const old=VM[id];VM[id]={path,name:f.name};vdirty[id]=VM[id];vids[id]=1;urls[id]=URL.createObjectURL(f);tried[id]=1;
+  if(old&&old.path!==path)delGH(old.path);
+  status[id]=["On GitHub ✓","ok"];queue()}
+ catch(e){status[id]=["Upload failed ("+e+")","er"]}
+ render()}
+$("#gh").onclick=()=>{const c=cfg();$("#g1").value=c.repo;$("#g2").value=c.branch;$("#g3").value=CF.dir||"";$("#g4").value=c.token;$("#gm").classList.add("on")};
+$("#gc").onclick=()=>$("#gm").classList.remove("on");
+$("#gm").onclick=e=>{if(e.target.id==="gm")$("#gm").classList.remove("on")};
+$("#gs").onclick=()=>{Object.assign(CF,{repo:$("#g1").value.trim(),branch:$("#g2").value.trim(),dir:$("#g3").value.trim(),token:$("#g4").value.trim()});sv("ue5.cfg",CF);$("#gm").classList.remove("on");start()};
+async function start(){try{await pull();setSy(cfg().token?"☁ synced":"read-only (no token)",cfg().token?"ok":"")}catch(e){setSy("⚠ can't load ("+e+") — check Settings","er")}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!saving&&!Object.keys(dirty).length&&!Object.keys(vdirty).length)start()});
+setInterval(()=>{if(!document.hidden&&cfg().token&&!saving&&!Object.keys(dirty).length&&!Object.keys(vdirty).length)start()},90000);
+render();start();
 </script></body></html>
