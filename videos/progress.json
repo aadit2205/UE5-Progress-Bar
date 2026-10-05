@@ -1,0 +1,15 @@
+{
+ "done": {
+  "Planets / Levels/desert": true,
+  "Planets / Levels/snow": true,
+  "Main Character/model": true,
+  "Main Character/animation": true
+ },
+ "videos": {
+  "Planets / Levels/desert": {
+   "path": "videos/videos/planets-levels-desert.mp4",
+   "name": "Screen Recording 2026-09-26 201056.mp4"
+  }
+ },
+ "updated": "2026-10-05T09:04:27.540Z"
+}
