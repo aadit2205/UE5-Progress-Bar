@@ -15,7 +15,9 @@
   "NPC/Enemies/Bosses/Rakhemien General/model": true,
   "NPC/Enemies/Bosses/Rakhemien General/animation": true,
   "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Foot Soldiers/model": true,
-  "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Foot Soldiers/animation": true
+  "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Foot Soldiers/animation": true,
+  "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Shooters/model": true,
+  "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Shooters/animation": true
  },
  "videos": {
   "Planets / Levels/desert": {
@@ -35,5 +37,5 @@
    "name": "Snow.mp4"
   }
  },
- "updated": "2026-10-13T12:38:05.369Z"
+ "updated": "2026-10-13T12:38:10.193Z"
 }
