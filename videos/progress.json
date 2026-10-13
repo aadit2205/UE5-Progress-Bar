@@ -4,7 +4,8 @@
   "Planets / Levels/snow": true,
   "Main Character/model": true,
   "Main Character/animation": true,
-  "NPC/Enemies/Bosses/Rakhemien Guard/model": true
+  "NPC/Enemies/Bosses/Rakhemien Guard/model": true,
+  "NPC/Enemies/Bosses/Rakhemien Guard/animation": true
  },
  "videos": {
   "Planets / Levels/desert": {
@@ -24,5 +25,5 @@
    "name": "Snow.mp4"
   }
  },
- "updated": "2026-10-13T12:37:41.220Z"
+ "updated": "2026-10-13T12:37:43.436Z"
 }
