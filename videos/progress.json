@@ -11,7 +11,9 @@
   "NPC/Enemies/Bosses/Rakhemien Master/Phase 2/model": true,
   "NPC/Enemies/Bosses/Rakhemien Master/Phase 2/animation": true,
   "NPC/Enemies/Bosses/Rakhemien Master/Phase 3/model": true,
-  "NPC/Enemies/Bosses/Rakhemien Master/Phase 3/animation": true
+  "NPC/Enemies/Bosses/Rakhemien Master/Phase 3/animation": true,
+  "NPC/Enemies/Bosses/Rakhemien General/model": true,
+  "NPC/Enemies/Bosses/Rakhemien General/animation": true
  },
  "videos": {
   "Planets / Levels/desert": {
@@ -31,5 +33,5 @@
    "name": "Snow.mp4"
   }
  },
- "updated": "2026-10-13T12:37:52.657Z"
+ "updated": "2026-10-13T12:37:55.432Z"
 }
