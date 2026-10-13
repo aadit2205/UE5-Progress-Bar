@@ -17,7 +17,8 @@
   "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Foot Soldiers/model": true,
   "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Foot Soldiers/animation": true,
   "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Shooters/model": true,
-  "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Shooters/animation": true
+  "NPC/Enemies/Normal Enemies/Rakhemien Federation Soldiers/Shooters/animation": true,
+  "Assets/Weapons/Knife/model": true
  },
  "videos": {
   "Planets / Levels/desert": {
@@ -37,5 +38,5 @@
    "name": "Snow.mp4"
   }
  },
- "updated": "2026-10-13T12:38:10.193Z"
+ "updated": "2026-10-13T12:38:20.070Z"
 }
